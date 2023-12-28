@@ -4039,27 +4039,6 @@ function getMemoryUsage() {
   return memoryUsagePercentage.toFixed(2);
 }
 
-const diskusage = require("diskusage");
-
-// Function to get hard disk space usage by the Node.js application
-function getNodeDiskSpaceUsage() {
-  const disk = diskusage.checkSync(__dirname); // Use the directory where your application is located
-  return {
-    total: disk.total, // Total disk space
-    free: disk.free, // Free disk space
-    used: disk.total - disk.free, // Used disk space
-  };
-}
-
-// Function to get memory usage by the Node.js application
-function getNodeMemoryUsage() {
-  const usage = process.memoryUsage();
-  return {
-    rss: usage.rss, // Resident Set Size
-    heapTotal: usage.heapTotal, // Total size of the heap
-    heapUsed: usage.heapUsed, // Heap actually used
-  };
-}
 
 const si = require("systeminformation");
 const SystemInfo = require("../models/system_info");
@@ -4144,10 +4123,8 @@ const getDriveDetails = (callback) => {
 router.post("/systemInfo", async (req, res) => {
   try {
     const memoryUsage = getMemoryUsage();
-    const nodeMemoryUsage = getNodeMemoryUsage();
     let networkUsage = await getNetworkUsage();
 
-    const nodeDiskSpaceUsage = getNodeDiskSpaceUsage();
 
     getDriveDetails(async (error, driveDetails) => {
       if (error) {
@@ -4181,7 +4158,6 @@ router.post("/systemInfo", async (req, res) => {
         memoryUsage: `${memoryUsage}`,
         networkInfo: networkUsage,
         cpuUsagePercentage: cpuDetails,
-        // nodeMemoryUsage,
         driveDetails,
       };
       let last_10_created = await SystemInfo.findAll({

@@ -4,56 +4,114 @@ const jwt = require("jsonwebtoken");
 const work_flow = require("../models/work_flow");
 const middleware = require("../middleware/authorization");
 
+// router.post("/createworkflow", middleware, async (req, res) => {
+//   try {
+//     const user_id = req.decodedToken.user.id;
+
+//     let { id, policy_name, workspace_name, group_admin, user_email, l_1, l_2 } =
+//       req.body;
+//     if (!policy_name) {
+//       return res.status(400).send({ message: "Please enter policy name" });
+//     }
+//     if (!workspace_name) {
+//       return res.status(400).send({ message: "Please enter workspace name" });
+//     }
+//     if (!group_admin) {
+//       return res.status(400).send({ message: "Please enter group admin" });
+//     }
+//     if (!user_email.length ===0 ) {
+//       return res.status(400).send({ message: "Please enter user email" });
+//     }
+//     let workFlow;
+//     if (id) {
+//       workFlow = await work_flow.findByPk(id);
+//       if (!workFlow) {
+//         return res.status(404).json({ message: "workFlow not found" });
+//       }
+//       (workFlow.policy_name = policy_name),
+//         (workFlow.workspace_name = workspace_name),
+//         (workFlow.group_admin = group_admin),
+//         (workFlow.user_email = user_email),
+//         (workFlow.l_1 = l_1),
+//         (workFlow.l_2 = l_2),
+//         await workFlow.save();
+
+//     } else {
+//        workFlow = await work_flow.create({
+//         policy_name: policy_name,
+//         workspace_name: workspace_name,
+//         group_admin: group_admin,
+//         user_email: user_email,
+//         l_1: l_1,
+//         l_2: l_2,
+//       });
+
+//     }
+//     return res.status(201).send({ message:"Work Flow Created/updated Sucessfully",workFlow });
+//   } catch (error) {
+//     return res.status(500).send({ message: "Server Error" });
+//   }
+// });
 router.post("/createworkflow", middleware, async (req, res) => {
   try {
-    // const token = req.header("Authorization");
-    // if (!token) {
-    //   return res.status(400).send({ message: "you are not logged in" });
-    // }
-    // const decodedToken = jwt.verify(token, "acmedms");
     const user_id = req.decodedToken.user.id;
 
-    let { id, policy_name, workspace_name, group_admin, user_email, l_1, l_2 } =
-      req.body;
-    if (!policy_name) {
-      return res.status(400).send({ message: "Please enter policy name" });
+    const {
+      id,
+      policy_name,
+      workspace_name,
+      group_admin,
+      user_email,
+      l_1,
+      l_2,
+    } = req.body;
+
+    // Validation
+    if (!policy_name || !workspace_name || !group_admin || !user_email || user_email.length === 0) {
+      return res.status(400).send({ message: "Invalid input data" });
     }
-    if (!workspace_name) {
-      return res.status(400).send({ message: "Please enter workspace name" });
-    }
-    if (!group_admin) {
-      return res.status(400).send({ message: "Please enter group admin" });
-    }
-    if (!user_email) {
-      return res.status(400).send({ message: "Please enter user email" });
-    }
+
     let workFlow;
+    const existingWorkflow = await work_flow.findOne({
+      where: { policy_name },
+    });
+
+    if (existingWorkflow && (!id || (id && existingWorkflow.id !== id))) {
+      return res.status(400).send({ message: "Policy name already exists" });
+    }
+
+
     if (id) {
+      // Update existing workflow
       workFlow = await work_flow.findByPk(id);
       if (!workFlow) {
-        return res.status(404).json({ message: "workFlow not found" });
+        return res.status(404).json({ message: "Workflow not found" });
       }
-      (workFlow.policy_name = policy_name),
-        (workFlow.workspace_name = workspace_name),
-        (workFlow.group_admin = group_admin),
-        (workFlow.user_email = user_email),
-        (workFlow.l_1 = l_1),
-        (workFlow.l_2 = l_2),
-        await workFlow.save();
 
+      workFlow.policy_name = policy_name;
+      workFlow.workspace_name = workspace_name;
+      workFlow.group_admin = group_admin;
+      workFlow.user_email = user_email;
+      workFlow.l_1 = l_1;
+      workFlow.l_2 = l_2;
+
+      await workFlow.save();
+      return res.status(200).send({ message: "Workflow updated successfully", workFlow });
     } else {
-       workFlow = await work_flow.create({
-        policy_name: policy_name,
-        workspace_name: workspace_name,
-        group_admin: group_admin,
-        user_email: user_email,
-        l_1: l_1,
-        l_2: l_2,
+      // Create new workflow
+      workFlow = await work_flow.create({
+        policy_name,
+        workspace_name,
+        group_admin,
+        user_email,
+        l_1,
+        l_2,
       });
 
+      return res.status(201).send({ message: "Workflow created successfully", workFlow });
     }
-    return res.status(201).send({ message:"Work Flow Created/updated Sucessfully",workFlow });
   } catch (error) {
+    console.error(error);
     return res.status(500).send({ message: "Server Error" });
   }
 });
@@ -61,9 +119,7 @@ router.post("/createworkflow", middleware, async (req, res) => {
 router.post("/getworkflow", async (req, res) => {
   try {
     const allWorkFlow = await work_flow.findAll({
-      attributes: {
-        include: ['updatedat'] 
-      }
+      order: [['createdAt', 'DESC']],
     });    
     return res.status(200).json({ allWorkFlow });
   } catch (error) {

@@ -24,7 +24,7 @@ const work_flow = sequelize.define(
       allowNull: false,
     },
     user_email: {
-      type: Sequelize.STRING,
+      type: Sequelize.JSONB,
       allowNull: false,
     },
     l_1: {
@@ -37,7 +37,7 @@ const work_flow = sequelize.define(
     },
   },
   {
-    timestamps: false, // Disable timestamps
+    timestamps: true,
   }
 );
 
