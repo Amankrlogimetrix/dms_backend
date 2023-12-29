@@ -3099,17 +3099,18 @@ router.post("/downloadfolders", middleware, async (req, res) => {
       folderToZip = path.join(
         process.env.DRIVE, 
         process.env.FOLDER_NAME , 
-        'new_created'
+        `${Foldername.folder_name}`
       );
     } else {
       folderToZip = path.join(
         process.env.SINGLE_PATH ,
-        'new_created'
+        `${Foldername.folder_name}`
       );
     }
     // Dynamically set the zip file name based on the folder name
     // const zipFileName = `${Foldername.folder_name}.zip`;
     const zipFileName = "zipped-folder.zip";
+    console.log(folderToZip,"foldertoZip")
 
     // Create a writable stream for the zip file
     const output = fs.createWriteStream(zipFileName);
@@ -3135,7 +3136,7 @@ router.post("/downloadfolders", middleware, async (req, res) => {
     archive.directory(folderToZip, false);
     // archive.directory(folderToZip, false, { name: path.relative(baseDir, folderToZip) });
 
-    archive.finalize();
+   await archive.finalize();
 
     output.on("close", async () => {
       try {
@@ -3174,8 +3175,8 @@ router.post("/downloadfolders", middleware, async (req, res) => {
         }
         // Delete the folder after the download is complete
 
-        fs.promises.rmdir(folderToZip, { recursive: true, force: true });
-        fs.promises.rm(zipFileName);
+       await fs.promises.rmdir(folderToZip, { recursive: true, force: true });
+       await fs.promises.rm(zipFileName);
       } catch (error) {
         console.error("Error sending zip file:", error);
         res
