@@ -773,8 +773,7 @@ cron.schedule("59 19 * * *", fetchDataFromUserDatabase);
 cron.schedule("35 18 * * *", deactive_user_and_guest);
 cron.schedule("*/5 * * * *", system_info);
 cron.schedule("30 18 * * *", () => databaseBakup(backupDir));
-// cron.schedule("0 0 * * 0", () => backupCode(backupDir));
-cron.schedule("25 18 * * *", () => backupCode(backupDir));
+cron.schedule("0 0 * * 0", () => backupCode(backupDir));
 
 const cornFunctionExecute = () => {
   const backupDir = path.join("/home", "dmsadmin", "Desktop", "backup");
