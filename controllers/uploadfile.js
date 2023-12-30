@@ -1264,7 +1264,7 @@ router.post("/getfoldernames", middleware, async (req, res) => {
           attributes: ["user_id", "createdAt"],
           order: [["timestamp", "DESC"]],
         });
-        let storedUpdateLoggs; 
+        let storedUpdateLoggs;
 
         if (update_loggs) {
           storedUpdateLoggs = { ...update_loggs.dataValues };
@@ -1648,8 +1648,8 @@ router.post("/getteamspace", middleware, async (req, res) => {
           id: id,
           workspace_name: workspace_name,
         },
-        attributes: ["folder_name","id"],
-        raw:true
+        attributes: ["folder_name", "id"],
+        raw: true,
       });
 
       folders = await Folder.findAll({
@@ -1678,7 +1678,6 @@ router.post("/getteamspace", middleware, async (req, res) => {
           "folder_id",
         ],
       });
-      
     } else {
       if (
         workspace.selected_users.includes(userEmail) &&
@@ -1946,7 +1945,7 @@ router.post("/getteamspace", middleware, async (req, res) => {
     await FolderAndFilesSize(folders);
     return res.status(200).json({ folders, files });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(500).send({ status: false, message: error.message });
   }
 });
@@ -2537,9 +2536,9 @@ router.post("/restore", middleware, async (req, res) => {
 
   let current_size;
   if (folder_id && folder_size) {
-    current_size = parseInt(folder_size)/1024;
+    current_size = parseInt(folder_size) / 1024;
   } else if (file_id && file_size) {
-    current_size = parseInt(file_size) /1024;
+    current_size = parseInt(file_size) / 1024;
   }
   try {
     let work_space = await Workspace.findOne({
@@ -2557,7 +2556,7 @@ router.post("/restore", middleware, async (req, res) => {
         total_file_size += parseInt(all_file_size[i].file_size) / 1024;
       }
     }
-    console.log({total_file_size,current_size},"checkfilesize")
+    console.log({ total_file_size, current_size }, "checkfilesize");
     if (work_space.quota <= total_file_size + current_size) {
       return res.status(400).send({
         message: `You Can Not Restore, ${workspace_name} Quota Is Full`,
@@ -3091,26 +3090,26 @@ router.post("/downloadfolders", middleware, async (req, res) => {
     //   `${Foldername.folder_name}`
     // );
 
-    const isWindows = os.platform() === 'win32';
+    const isWindows = os.platform() === "win32";
 
     let folderToZip;
-    
+
     if (isWindows) {
       folderToZip = path.join(
-        process.env.DRIVE, 
-        process.env.FOLDER_NAME , 
+        process.env.DRIVE,
+        process.env.FOLDER_NAME,
         `${Foldername.folder_name}`
       );
     } else {
       folderToZip = path.join(
-        process.env.SINGLE_PATH ,
+        process.env.SINGLE_PATH,
         `${Foldername.folder_name}`
       );
     }
     // Dynamically set the zip file name based on the folder name
     // const zipFileName = `${Foldername.folder_name}.zip`;
     const zipFileName = "zipped-folder.zip";
-    console.log(folderToZip,"foldertoZip")
+    console.log(folderToZip, "foldertoZip");
 
     // Create a writable stream for the zip file
     const output = fs.createWriteStream(zipFileName);
@@ -3136,7 +3135,7 @@ router.post("/downloadfolders", middleware, async (req, res) => {
     archive.directory(folderToZip, false);
     // archive.directory(folderToZip, false, { name: path.relative(baseDir, folderToZip) });
 
-   await archive.finalize();
+    await archive.finalize();
 
     output.on("close", async () => {
       try {
@@ -3175,8 +3174,8 @@ router.post("/downloadfolders", middleware, async (req, res) => {
         }
         // Delete the folder after the download is complete
 
-       await fs.promises.rmdir(folderToZip, { recursive: true, force: true });
-       await fs.promises.rm(zipFileName);
+        await fs.promises.rmdir(folderToZip, { recursive: true, force: true });
+        await fs.promises.rm(zipFileName);
       } catch (error) {
         console.error("Error sending zip file:", error);
         res
@@ -3209,23 +3208,19 @@ router.post("/compress", (req, res) => {
   //   "new_created"
   // );
 
-  
-const isWindows = os.platform() === 'win32';
+  const isWindows = os.platform() === "win32";
 
-let folderToZip;
+  let folderToZip;
 
-if (isWindows) {
-  folderToZip = path.join(
-    process.env.DRIVE, 
-    process.env.FOLDER_NAME , 
-    'new_created'
-  );
-} else {
-  folderToZip = path.join(
-    process.env.SINGLE_PATH ,
-    'new_created'
-  );
-}
+  if (isWindows) {
+    folderToZip = path.join(
+      process.env.DRIVE,
+      process.env.FOLDER_NAME,
+      "new_created"
+    );
+  } else {
+    folderToZip = path.join(process.env.SINGLE_PATH, "new_created");
+  }
   const zipFileName = "zipped-folder.zip";
 
   // Create a writable stream for the zip file
@@ -3452,7 +3447,7 @@ router.post("/updatefolder", middleware, async (req, res) => {
               updateData.file_description = file_doctype.file_description;
             }
             if (levels || workspace_id) {
-              updateData.levels = folder_id !== null ? "1"  :"0";//levels || "0";
+              updateData.levels = folder_id !== null ? "1" : "0"; //levels || "0";
               updateData.workspace_id = workspace_id;
               updateData.folder_id = folder_id || null;
               updateData.workspace_name = workspace_name;
@@ -3665,7 +3660,6 @@ router.post("/stopServer", (req, res) => {
   }
 });
 
-
 // // Function to get memory usage
 function getMemoryUsage() {
   const totalMemory = os.totalmem();
@@ -3674,7 +3668,6 @@ function getMemoryUsage() {
   const memoryUsagePercentage = (usedMemory / totalMemory) * 100;
   return memoryUsagePercentage.toFixed(2);
 }
-
 
 const si = require("systeminformation");
 const SystemInfo = require("../models/system_info");
@@ -3761,7 +3754,6 @@ router.post("/systemInfo", async (req, res) => {
     const memoryUsage = getMemoryUsage();
     let networkUsage = await getNetworkUsage();
 
-
     getDriveDetails(async (error, driveDetails) => {
       if (error) {
         console.error("Error retrieving drive details:", error);
@@ -3797,7 +3789,7 @@ router.post("/systemInfo", async (req, res) => {
         driveDetails,
       };
       let last_10_created = await SystemInfo.findAll({
-        order: [["createdAt", "DESC"]], 
+        order: [["createdAt", "DESC"]],
         attributes: ["networkInfo", "createdAt"],
         limit: 10,
       });
